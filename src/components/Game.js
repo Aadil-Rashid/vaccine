@@ -169,14 +169,14 @@ const Game = () => {
         color: '#2c3e50',
         fontStyle: 'bold'
       });
-      title.setOrigin(0.5);
+      title.setOrigin(0.4, 0.3);
 
       // Calculate available width for text
       const padding = 40;
       const maxWidth = 550;  // Panel width minus padding
 
       const welcomeText = this.add.text(600, 400,
-        'Your mission is to save patients before their health depletes!\n\n\n\n' +
+        'Your mission is to save patients before virus kills them!\n\n\n\n' +
         '🔴 Red - Critical Condition\n' +
         '🟡 Yellow - Moderate Condition\n' +
         '🟢 Green - Stable Condition\n\n' +
@@ -338,7 +338,7 @@ const Game = () => {
         patient.saved = true;
         patient.health = 100;
         patient.setTexture('patient-stable');
-        patient.healthText.setText('100%');
+        updateHealthBar(patient);
         
         // Add healing particle effect
         const particles = this.add.particles(patient.x, patient.y, 'patient-stable', {
@@ -502,9 +502,23 @@ const Game = () => {
     }
 
     function updateHealthBar(patient) {
-      const healthPercentage = patient.health / patient.initialHealth;
+      // Clamp health percentage between 0 and 1
+      const healthPercentage = Math.min(1, patient.health / 100);
       patient.healthBar.clear();
-      patient.healthBar.fillStyle(patient.health <= 0 ? 0x333333 : 0xff0000);
+      
+      // Determine health bar color based on health percentage or saved status
+      let barColor;
+      if (patient.saved) {
+        barColor = 0x00ff00;  // Bright green for saved patients
+      } else if (patient.health <= 30) {
+        barColor = 0xff0000;  // Red for critical
+      } else if (patient.health <= 60) {
+        barColor = 0xffa500;  // Orange for moderate
+      } else {
+        barColor = 0x00ff00;  // Green for healthy
+      }
+      
+      patient.healthBar.fillStyle(patient.health <= 0 ? 0x333333 : barColor);
       patient.healthBar.fillRect(
         patient.x - 20, 
         patient.y - 25, 
