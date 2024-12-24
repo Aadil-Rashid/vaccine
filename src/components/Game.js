@@ -109,19 +109,20 @@ const Game = () => {
       uiPanel.setStrokeStyle(2, 0x2c3e50);
       uiPanel.setDepth(1);
 
-      // Add timer
+      // Add timer with better positioning
       this.gameTimer = 0;
-      this.timerText = this.add.text(700, 16, 'Time: 0s', {
-          fontSize: '28px',
+      this.timerText = this.add.text(600, 16, 'Time: 0s', {
+          fontSize: '24px',
           fontFamily: 'Arial',
           color: '#2c3e50',
-          fontStyle: 'bold'
+          fontStyle: 'bold',
+          padding: { x: 10, y: 5 }
       });
       this.timerText.setDepth(2);
 
       // Update score text position and style
-      scoreText = this.add.text(16, 16, 'Saved: 0 | Lost: 0', {
-          fontSize: '28px',
+      scoreText = this.add.text(200, 16, 'Saved: 0 | Lost: 0', {
+          fontSize: '24px',
           fontFamily: 'Arial',
           color: '#2c3e50',
           fontStyle: 'bold',
@@ -129,6 +130,10 @@ const Game = () => {
           padding: { x: 10, y: 5 }
       });
       scoreText.setDepth(2);
+
+      // Center both texts in the UI panel
+      this.timerText.setOrigin(0.5, 0);
+      scoreText.setOrigin(0.5, 0);
 
       // Create patients with dynamic health states
       patients = [];
@@ -240,9 +245,14 @@ const Game = () => {
     function update() {
       if (!gameStarted || gameOver) return;
 
-      // Update timer
+      // Update timer with better formatting
+      const seconds = Math.floor(this.gameTimer / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      this.timerText.setText(
+          `Time: ${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+      );
       this.gameTimer += this.game.loop.delta;
-      this.timerText.setText(`Time: ${Math.floor(this.gameTimer / 1000)}s`);
 
       // Movement logic
       const speed = 300;
@@ -333,41 +343,182 @@ const Game = () => {
       scene.bgMusic.stop();
       scene.gameOverSound.play();
 
-      // Fancy game over panel with gradient
-      const panel = scene.add.rectangle(400, 300, 500, 400, 0xffffff, 0.95);
+      // Create a semi-transparent overlay
+      const overlay = scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.5);
+
+      // Larger panel for better spacing
+      const panel = scene.add.rectangle(400, 300, 550, 550, 0xffffff, 0.95);
       panel.setStrokeStyle(4, 0x2c3e50);
 
-      // Add final stats
-      const timeElapsed = Math.floor(scene.gameTimer / 1000);
-      const saveRate = Math.round((savedPatients / patients.length) * 100);
+      // Move header up
+      const headerBg = scene.add.rectangle(400, 140, 550, 70, 0x2c3e50);
       
-      gameOverText = scene.add.text(400, 200, 
-        `Game Over!\n\n` +
-        `Time: ${timeElapsed}s\n` +
-        `Saved: ${savedPatients}\n` +
-        `Lost: ${lostPatients}\n` +
-        `Save Rate: ${saveRate}%\n\n` +
-        `Click to play again!`, {
-        fontSize: '32px',
-        fontFamily: 'Arial',
-        color: '#2c3e50',
-        fontStyle: 'bold',
-        align: 'center',
-        lineSpacing: 10
+      // Game Over text moved up
+      const gameOverTitle = scene.add.text(400, 140, 'Game Over!', {
+          fontSize: '44px',
+          fontFamily: 'Arial',
+          color: '#ffffff',
+          fontStyle: 'bold',
+          align: 'center'
       });
-      gameOverText.setOrigin(0.5);
+      gameOverTitle.setOrigin(0.5);
+      gameOverTitle.setShadow(3, 3, '#000000', 5, true, true);
 
-      // Add star rating based on performance
-      const stars = Math.min(5, Math.ceil(saveRate / 20));
-      for (let i = 0; i < 5; i++) {
-          const star = scene.add.text(300 + (i * 40), 400, '⭐', {
-              fontSize: '40px',
-              color: i < stars ? '#FFD700' : '#808080'
-          });
-          star.setOrigin(0.5);
+      // Calculate stats with better formatting
+      const timeElapsed = Math.floor(scene.gameTimer / 1000);
+      const minutes = Math.floor(timeElapsed / 60);
+      const seconds = timeElapsed % 60;
+      const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      const saveRate = Math.round((savedPatients / patients.length) * 100);
+
+      // Performance calculation (unchanged)
+      let performanceText = '';
+      let performanceColor = '';
+      let starCount = 0;
+
+      if (saveRate >= 90) {
+          performanceText = 'Outstanding! 🏆';
+          performanceColor = '#FFD700';
+          starCount = 5;
+      } else if (saveRate >= 80) {
+          performanceText = 'Excellent! 🌟';
+          performanceColor = '#00FF00';
+          starCount = 4;
+      } else if (saveRate >= 70) {
+          performanceText = 'Great Job! 👍';
+          performanceColor = '#4CAF50';
+          starCount = 3;
+      } else if (saveRate >= 50) {
+          performanceText = 'Keep Practicing! 💪';
+          performanceColor = '#FFA500';
+          starCount = 2;
+      } else if (saveRate >= 30) {
+          performanceText = 'Try Again! 🎯';
+          performanceColor = '#FF6B6B';
+          starCount = 1;
+      } else {
+          performanceText = 'Keep Going! 🌱';
+          performanceColor = '#FF4444';
+          starCount = 0;
       }
-    }
 
+      // Stats moved down for better spacing
+      const statsStyle = {
+          fontSize: '26px',
+          fontFamily: 'Arial',
+          color: '#2c3e50',
+          align: 'left',
+          lineSpacing: 20  // Increased line spacing
+      };
+
+      // Stats positioned lower with more space
+      const stats = scene.add.text(400, 260, 
+          `⏱️ Time: ${timeString}\n` +
+          `💉 Saved: ${savedPatients}\n` +
+          `💔 Lost: ${lostPatients}\n` +
+          `📊 Save Rate: ${saveRate}%`, 
+          statsStyle
+      );
+      stats.setOrigin(0.5);
+
+      // Performance text with more space
+      const performance = scene.add.text(400, 370, performanceText, {
+          fontSize: '32px',
+          fontFamily: 'Arial',
+          color: performanceColor,
+          fontStyle: 'bold'
+      });
+      performance.setOrigin(0.5);
+      
+      // Performance animation
+      scene.tweens.add({
+          targets: performance,
+          scale: { from: 0, to: 1 },
+          duration: 500,
+          ease: 'Back.out'
+      });
+
+      // Stars moved down
+      const starContainer = scene.add.container(0, 430);
+      const starSpacing = 50;
+      const startX = 400 - ((5 * starSpacing) / 2) + (starSpacing / 2);
+
+      // Star creation logic
+      for (let i = 0; i < 5; i++) {
+          const starX = startX + (i * starSpacing);
+          const isEarned = i < starCount;
+          
+          const starBg = scene.add.text(starX, 0, '⭐', {
+              fontSize: '40px',
+              color: '#D3D3D3'
+          });
+          starBg.setOrigin(0.5);
+          starContainer.add(starBg);
+
+          if (isEarned) {
+              const star = scene.add.text(starX, 0, '⭐', {
+                  fontSize: '40px',
+                  color: '#FFD700'
+              });
+              star.setOrigin(0.5);
+              starContainer.add(star);
+              
+              // Star animations
+              scene.tweens.add({
+                  targets: star,
+                  scale: { from: 0, to: 1 },
+                  duration: 300,
+                  delay: i * 150,
+                  ease: 'Back.out',
+                  onComplete: () => {
+                      scene.tweens.add({
+                          targets: star,
+                          y: { from: 0, to: -5 },
+                          duration: 1000,
+                          yoyo: true,
+                          repeat: -1,
+                          ease: 'Sine.inOut'
+                      });
+                  }
+              });
+          }
+      }
+
+      // Play again button moved to bottom
+      const playAgainBtn = scene.add.rectangle(400, 500, 220, 60, 0x2c3e50, 1);
+      playAgainBtn.setStrokeStyle(2, 0x1abc9c);
+      
+      const playAgainText = scene.add.text(400, 500, 'Play Again', {
+          fontSize: '26px',
+          fontFamily: 'Arial',
+          color: '#ffffff',
+          fontStyle: 'bold'
+      });
+      playAgainText.setOrigin(0.5);
+
+      // Button interactivity
+      playAgainBtn.setInteractive();
+      playAgainBtn.on('pointerover', () => {
+          playAgainBtn.setFillStyle(0x1abc9c);
+          playAgainText.setScale(1.1);
+          scene.game.canvas.style.cursor = 'pointer';
+      });
+      playAgainBtn.on('pointerout', () => {
+          playAgainBtn.setFillStyle(0x2c3e50);
+          playAgainText.setScale(1);
+          scene.game.canvas.style.cursor = 'default';
+      });
+      playAgainBtn.on('pointerdown', () => {
+          playAgainBtn.setFillStyle(0x16a085);
+          restartGame(scene);
+      });
+
+      // Store all elements
+      scene.gameOverElements = [
+          overlay, panel, headerBg, gameOverTitle, 
+          stats, performance, starContainer, playAgainBtn, playAgainText
+      ];
+    }
 
     function updateHealthBar(patient) {
       const healthPercentage = patient.health / patient.initialHealth;
@@ -389,13 +540,21 @@ const Game = () => {
       gameOver = false;
       savedPatients = 0;
       lostPatients = 0;
+      
+      // Clean up patients
       patients.forEach(patient => {
-        patient.destroy();
-        patient.healthText.destroy();
-        if (patient.healthBar) patient.healthBar.destroy();
-        if (patient.healthBarBg) patient.healthBarBg.destroy();
+          patient.destroy();
+          patient.healthText.destroy();
+          if (patient.healthBar) patient.healthBar.destroy();
+          if (patient.healthBarBg) patient.healthBarBg.destroy();
       });
       patients = [];
+      
+      // Clean up game over elements
+      if (scene.gameOverElements) {
+          scene.gameOverElements.forEach(element => element.destroy());
+      }
+      
       scoreText.setText('Saved: 0 | Lost: 0');
       scene.scene.restart();
     }
