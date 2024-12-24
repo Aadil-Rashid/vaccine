@@ -84,6 +84,13 @@ const Game = () => {
           const patientBase64 = patientCanvas.toDataURL();
           this.textures.addBase64(`patient-${state}`, patientBase64);
       });
+
+      // Load audio files
+      this.load.audio('bgMusic', '/assets/audio/bgMusic.mp3');
+      this.load.audio('healSound', '/assets/audio/heal.mp3');
+      this.load.audio('loseSound', '/assets/audio/patientLost.mp3');
+      this.load.audio('gameOverSound', '/assets/audio/gameOver.mp3');
+      this.load.audio('buttonSound', '/assets/audio/button.mp3');
     }
 
     function create() {
@@ -224,21 +231,53 @@ const Game = () => {
       // Store UI elements for later access
       this.instructionsUI = [instructionsPanel, title, welcomeText];
 
-      // Add sound effects
-      this.healSound = { play: () => {} };
-      this.patientLostSound = { play: () => {} };
-      this.gameOverSound = { play: () => {} };
-      this.bgMusic = { play: () => {}, stop: () => {} };
+      // Initialize audio with proper configuration
+      this.bgMusic = this.sound.add('bgMusic', { 
+          loop: true, 
+          volume: 0.5 
+      });
+      
+      this.healSound = this.sound.add('healSound', { 
+          volume: 0.8 
+      });
+      
+      this.loseSound = this.sound.add('loseSound', { 
+          volume: 0.6 
+      });
+      
+      this.gameOverSound = this.sound.add('gameOverSound', { 
+          volume: 0.7 
+      });
 
-      // Start game on click
+      this.buttonSound = this.sound.add('buttonSound', { 
+          volume: 0.5 
+      });
+
+      // Add mute button
+      const muteButton = this.add.text(750, 16, '🔊', {
+          fontSize: '24px',
+          padding: { x: 10, y: 5 }
+      });
+      muteButton.setInteractive();
+      muteButton.setDepth(2);
+
+      let isMuted = false;
+      muteButton.on('pointerdown', () => {
+          isMuted = !isMuted;
+          this.sound.mute = isMuted;
+          muteButton.setText(isMuted ? '🔇' : '🔊');
+      });
+
+      // Update start game click handler
       this.input.on('pointerdown', () => {
-        if (!gameStarted) {
-          gameStarted = true;
-          this.bgMusic.play();
-          this.instructionsUI.forEach(element => element.destroy());
-        } else if (gameOver) {
-          restartGame(this);
-        }
+          if (!gameStarted) {
+              gameStarted = true;
+              this.bgMusic.play();
+              this.instructionsUI.forEach(element => element.destroy());
+          } else if (gameOver) {
+              this.buttonSound.play();
+              restartGame(this);
+          }
       });
     }
 
@@ -292,6 +331,7 @@ const Game = () => {
             patient.healthBar.destroy();
             patient.healthBarBg.destroy();
             patient.healthText.destroy();
+            this.loseSound.play();  // Play lose sound
             lostPatients++;
             updateScore();
           }
@@ -323,12 +363,13 @@ const Game = () => {
             emitting: true
         });
         
+        this.healSound.play();  // Play heal sound
+        
         // Stop emitting and destroy particles after animation
         this.time.delayedCall(1000, () => {
             particles.destroy();
         });
         
-        this.healSound.play();
         savedPatients++;
         updateScore();
       }
@@ -456,6 +497,7 @@ const Game = () => {
           scene.game.canvas.style.cursor = 'default';
       });
       playAgainBtn.on('pointerdown', () => {
+          scene.buttonSound.play();
           playAgainBtn.setFillStyle(0x16a085);
           restartGame(scene);
       });
