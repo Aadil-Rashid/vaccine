@@ -5,8 +5,8 @@ const Game = () => {
   useEffect(() => {
     const config = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      width: 1200,
+      height: 800,
       backgroundColor: "#ffffff",
       parent: "gameContainer",
       physics: {
@@ -100,28 +100,28 @@ const Game = () => {
       // Add background with smooth gradient
       const background = this.add.graphics();
       background.fillStyle(0xadd8e6, 1);
-      background.fillRect(0, 0, 800, 600);
+      background.fillRect(0, 0, 1200, 800);
 
-      // Add hospital-themed decorative elements
-      for (let i = 0; i < 6; i++) {
-        const x = Phaser.Math.Between(50, 750);
-        const y = Phaser.Math.Between(50, 550);
+      // Add more decorative elements for larger space
+      for (let i = 0; i < 10; i++) {
+        const x = Phaser.Math.Between(50, 1150);
+        const y = Phaser.Math.Between(50, 750);
         this.add.circle(x, y, 20, 0xe6eeff, 0.5);
       }
 
-      // Create player (doctor) with improved visuals
-      player = this.physics.add.sprite(400, 300, 'doctor');
+      // Center player in larger space
+      player = this.physics.add.sprite(600, 400, 'doctor');
       player.setScale(1.2);
       player.setCollideWorldBounds(true);
 
-      // Add UI panel with rounded corners
-      const uiPanel = this.add.rectangle(400, 30, 780, 50, 0xffffff, 0.95);
+      // Update UI panel width
+      const uiPanel = this.add.rectangle(600, 30, 1180, 50, 0xffffff, 0.95);
       uiPanel.setStrokeStyle(2, 0x2c3e50);
       uiPanel.setDepth(1);
 
       // Initialize timer for 60 seconds countdown
       this.gameTimer = gameTime * 1000; // Convert to milliseconds
-      this.timerText = this.add.text(600, 16, 'Time: 0:30', {
+      this.timerText = this.add.text(900, 16, 'Time: 0:30', {
           fontSize: '24px',
           fontFamily: 'Arial',
           color: '#2c3e50',
@@ -131,7 +131,7 @@ const Game = () => {
       this.timerText.setDepth(2);
 
       // Update score text position and style
-      scoreText = this.add.text(200, 16, 'Saved: 0 | Lost: 0', {
+      scoreText = this.add.text(300, 16, 'Saved: 0 | Lost: 0', {
           fontSize: '24px',
           fontFamily: 'Arial',
           color: '#2c3e50',
@@ -160,10 +160,10 @@ const Game = () => {
       cursors = this.input.keyboard.createCursorKeys();
 
       // Create welcome screen with improved UI layout
-      const instructionsPanel = this.add.rectangle(400, 300, 600, 400, 0xffffff, 0.9);
+      const instructionsPanel = this.add.rectangle(600, 400, 600, 400, 0xffffff, 0.9);
       instructionsPanel.setStrokeStyle(4, 0x2c3e50);
       
-      const title = this.add.text(400, 180, 'Vaccine Rush!', {
+      const title = this.add.text(600, 200, 'Vaccine Rush!', {
         fontSize: '42px',
         fontFamily: 'Arial',
         color: '#2c3e50',
@@ -175,7 +175,7 @@ const Game = () => {
       const padding = 40;
       const maxWidth = 550;  // Panel width minus padding
 
-      const welcomeText = this.add.text(400, 300,
+      const welcomeText = this.add.text(600, 400,
         'Your mission is to save patients before their health depletes!\n\n\n\n' +
         '🔴 Red - Critical Condition\n' +
         '🟡 Yellow - Moderate Condition\n' +
@@ -194,8 +194,8 @@ const Game = () => {
       // Adjust position if text is too tall
       const totalHeight = title.height + welcomeText.height + 20;
       if (totalHeight > 350) {
-        title.setPosition(400, 150);
-        welcomeText.setPosition(400, title.y + title.height + 20);
+        title.setPosition(600, 150);
+        welcomeText.setPosition(600, title.y + title.height + 20);
       }
 
       // Store UI elements for later access
@@ -224,7 +224,7 @@ const Game = () => {
       });
 
       // Add mute button
-      const muteButton = this.add.text(750, 16, '🔊', {
+      const muteButton = this.add.text(1150, 16, '🔊', {
           fontSize: '24px',
           padding: { x: 10, y: 5 }
       });
@@ -376,17 +376,17 @@ const Game = () => {
       const timeUp = scene.gameTimer <= 0;
       
       // Create a semi-transparent overlay
-      const overlay = scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.5);
+      const overlay = scene.add.rectangle(600, 400, 1200, 800, 0x000000, 0.5);
 
       // Even larger panel with more height
-      const panel = scene.add.rectangle(400, 300, 550, 600, 0xffffff, 0.95);
+      const panel = scene.add.rectangle(600, 400, 650, 600, 0xffffff, 0.95);
       panel.setStrokeStyle(4, 0x2c3e50);
 
       // Move header to top
-      const headerBg = scene.add.rectangle(400, 100, 550, 70, 0x2c3e50);
+      const headerBg = scene.add.rectangle(600, 200, 650, 70, 0x2c3e50);
       
       // Game Over text at top
-      const gameOverTitle = scene.add.text(400, 100, 'Game Over!', {
+      const gameOverTitle = scene.add.text(600, 200, 'Game Over!', {
           fontSize: '44px',
           fontFamily: 'Arial',
           color: '#ffffff',
@@ -444,7 +444,7 @@ const Game = () => {
       };
 
       // Stats positioned with much more space from title
-      const stats = scene.add.text(400, 200, 
+      const stats = scene.add.text(600, 300, 
           `${timeUp ? '⏰ Time Up!\n\n' : ''}` +
           `⏱️ Time: ${timeString}\n` +
           `💉 Saved: ${savedPatients}\n` +
@@ -455,7 +455,7 @@ const Game = () => {
       stats.setOrigin(0.2);
 
       // Performance text moved down with more space
-      const performance = scene.add.text(400, 400, performanceText, {
+      const performance = scene.add.text(600, 500, performanceText, {
           fontSize: '32px',
           fontFamily: 'Arial',
           color: performanceColor,
@@ -464,11 +464,11 @@ const Game = () => {
       performance.setOrigin(0.5);
 
       // Stars moved down with more space
-      const starContainer = scene.add.container(0, 470);
+      const starContainer = scene.add.container(0, 670);
 
       // Play again button at bottom
-      const playAgainBtn = scene.add.rectangle(400, 540, 220, 60, 0x2c3e50, 1);
-      const playAgainText = scene.add.text(400, 540, 'Play Again', {
+      const playAgainBtn = scene.add.rectangle(600, 740, 220, 60, 0x2c3e50, 1);
+      const playAgainText = scene.add.text(600, 740, 'Play Again', {
           fontSize: '26px',
           fontFamily: 'Arial',
           color: '#ffffff',
@@ -545,8 +545,8 @@ const Game = () => {
     }
 
     function spawnPatient() {
-        const x = Phaser.Math.Between(50, 750);
-        const y = Phaser.Math.Between(100, 550);
+        const x = Phaser.Math.Between(50, 1150);
+        const y = Phaser.Math.Between(100, 750);
         const health = Phaser.Math.Between(30, 70);
         const patient = this.physics.add.sprite(x, y, 'patient-critical');
         patient.setScale(1.1);
@@ -589,7 +589,11 @@ const Game = () => {
     };
   }, []);
 
-  return <div id="gameContainer" style={{ margin: '0 auto' }}></div>;
+  return <div id="gameContainer" style={{ 
+    margin: '0 auto',
+    maxWidth: '1200px',  // Match game width
+    height: '800px'      // Match game height
+  }}></div>;
 };
 
 export default Game;
