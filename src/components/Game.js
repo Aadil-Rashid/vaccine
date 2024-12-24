@@ -119,7 +119,7 @@ const Game = () => {
       uiPanel.setStrokeStyle(2, 0x2c3e50);
       uiPanel.setDepth(1);
 
-      // Initialize timer for 60 seconds countdown
+      // Initialize timer for 30 seconds countdown
       this.gameTimer = gameTime * 1000; // Convert to milliseconds
       this.timerText = this.add.text(900, 16, 'Time: 0:30', {
           fontSize: '24px',
