@@ -238,12 +238,21 @@ const Game = () => {
           muteButton.setText(isMuted ? '🔇' : '🔊');
       });
 
-      // Update start game click handler
+      // Update start game click handler with improved cleanup
       this.input.on('pointerdown', () => {
-          if (!gameStarted) {
+          if (!gameStarted && this.instructionsUI) {
+              // Clean up welcome screen
+              this.instructionsUI.forEach(element => {
+                  if (element && element.destroy) {
+                      element.destroy();
+                  }
+              });
+              // Clear the reference
+              this.instructionsUI = null;
+              
+              // Start the game
               gameStarted = true;
               this.bgMusic.play();
-              this.instructionsUI.forEach(element => element.destroy());
           } else if (gameOver) {
               this.buttonSound.play();
               restartGame(this);
@@ -417,7 +426,7 @@ const Game = () => {
           performanceColor = '#00FF00';
           starCount = 4;
       } else if (saveRate >= 70) {
-          performanceText = 'Great Job! 👍';
+          performanceText = 'Great Job! 🌟';
           performanceColor = '#4CAF50';
           starCount = 3;
       } else if (saveRate >= 50) {
@@ -531,6 +540,7 @@ const Game = () => {
     }
 
     function restartGame(scene) {
+      // Reset game state
       gameStarted = false;
       gameOver = false;
       savedPatients = 0;
@@ -551,10 +561,29 @@ const Game = () => {
       
       // Clean up game over elements
       if (scene.gameOverElements) {
-          scene.gameOverElements.forEach(element => element.destroy());
+          scene.gameOverElements.forEach(element => {
+              if (element && element.destroy) {
+                  element.destroy();
+              }
+          });
+          scene.gameOverElements = null;
+      }
+
+      // Clean up welcome screen elements
+      if (scene.instructionsUI) {
+          scene.instructionsUI.forEach(element => {
+              if (element && element.destroy) {
+                  element.destroy();
+              }
+          });
+          scene.instructionsUI = null;
       }
       
       scoreText.setText('Saved: 0 | Lost: 0');
+      
+      // Stop any playing music
+      if (scene.bgMusic) scene.bgMusic.stop();
+      
       scene.scene.restart();
     }
 
