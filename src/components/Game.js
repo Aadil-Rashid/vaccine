@@ -37,31 +37,146 @@ const Game = () => {
     let spawnInterval = 2000; // Spawn a new patient every 2 seconds
 
     function preload() {
-      // Load doctor character texture
-      const doctor = new Path2D();
-      doctor.moveTo(0, 20);
-      doctor.lineTo(40, 20);
-      doctor.lineTo(40, 60);
-      doctor.lineTo(0, 60);
-      doctor.closePath();
-      
+      // Create doctor character with modern design
       const canvas = document.createElement('canvas');
-      canvas.width = 40;
-      canvas.height = 60;
+      canvas.width = 50;  // Increased width for more detail
+      canvas.height = 70; // Increased height for better proportions
       const ctx = canvas.getContext('2d');
       
-      // Draw doctor
-      ctx.fillStyle = '#ffffff';
-      ctx.fill(doctor);
-      ctx.strokeStyle = '#000000';
+      // Add shadow effect
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+
+      // Draw doctor's coat (white with subtle gradient)
+      const gradient = ctx.createLinearGradient(0, 15, 0, 65);
+      gradient.addColorStop(0, '#ffffff');
+      gradient.addColorStop(1, '#f0f8ff');
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(10, 20);
+      ctx.lineTo(40, 20);
+      ctx.lineTo(45, 65);
+      ctx.lineTo(5, 65);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Coat outline
+      ctx.strokeStyle = '#2c3e50';
       ctx.lineWidth = 2;
-      ctx.stroke(doctor);
+      ctx.stroke();
+
+      // Draw doctor's head with face details
+      ctx.shadowBlur = 0; // Remove shadow for face details
       
-      // Add medical cross
-      ctx.fillStyle = '#ff0000';
-      ctx.fillRect(15, 30, 10, 20);
-      ctx.fillRect(10, 35, 20, 10);
+      // Head shape
+      ctx.fillStyle = '#ffe0bd';
+      ctx.beginPath();
+      ctx.arc(25, 15, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Eyes
+      ctx.fillStyle = '#2c3e50';
+      ctx.beginPath();
+      ctx.arc(22, 13, 1.5, 0, Math.PI * 2);
+      ctx.arc(28, 13, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Smile
+      ctx.beginPath();
+      ctx.arc(25, 15, 5, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.strokeStyle = '#2c3e50';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Hair
+      ctx.fillStyle = '#4a4a4a';
+      ctx.beginPath();
+      ctx.arc(25, 11, 10, Math.PI * 1.2, Math.PI * 2);
+      ctx.fill();
+
+      // Draw medical cap
+      ctx.fillStyle = '#4299e1';
+      ctx.beginPath();
+      ctx.arc(25, 8, 8, Math.PI * 1.2, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#2b6cb0';
+      ctx.stroke();
+
+      // Medical symbol on cap
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(25, 8, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#2b6cb0';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Coat details with gradient
+      const coatGradient = ctx.createLinearGradient(10, 20, 40, 20);
+      coatGradient.addColorStop(0, '#e2e8f0');
+      coatGradient.addColorStop(0.5, '#ffffff');
+      coatGradient.addColorStop(1, '#e2e8f0');
       
+      // Lapels
+      ctx.fillStyle = coatGradient;
+      ctx.beginPath();
+      ctx.moveTo(18, 20);
+      ctx.lineTo(25, 35);
+      ctx.lineTo(32, 20);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#2c3e50';
+      ctx.stroke();
+
+      // Add stethoscope with metallic effect
+      const scopeGradient = ctx.createLinearGradient(30, 25, 35, 30);
+      scopeGradient.addColorStop(0, '#718096');
+      scopeGradient.addColorStop(0.5, '#a0aec0');
+      scopeGradient.addColorStop(1, '#718096');
+
+      ctx.strokeStyle = scopeGradient;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(35, 25);
+      ctx.quadraticCurveTo(40, 30, 38, 40);
+      ctx.quadraticCurveTo(37, 45, 32, 45);
+      ctx.stroke();
+
+      // Stethoscope head
+      ctx.beginPath();
+      ctx.arc(32, 45, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#4a5568';
+      ctx.fill();
+      ctx.stroke();
+
+      // Add medical cross with gradient
+      const crossGradient = ctx.createLinearGradient(20, 35, 30, 55);
+      crossGradient.addColorStop(0, '#fc8181');
+      crossGradient.addColorStop(1, '#e53e3e');
+      
+      ctx.fillStyle = crossGradient;
+      // Vertical part
+      ctx.fillRect(22, 40, 6, 18);
+      // Horizontal part
+      ctx.fillRect(16, 46, 18, 6);
+
+      // Add subtle pocket
+      ctx.strokeStyle = '#4a5568';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(15, 52, 20, 8);
+
+      // Add buttons
+      ctx.fillStyle = '#4a5568';
+      ctx.beginPath();
+      ctx.arc(25, 42, 1.5, 0, Math.PI * 2);
+      ctx.arc(25, 48, 1.5, 0, Math.PI * 2);
+      ctx.arc(25, 54, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
       // Convert to base64
       const doctorBase64 = canvas.toDataURL();
       this.textures.addBase64('doctor', doctorBase64);
