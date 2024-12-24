@@ -32,6 +32,9 @@ const Game = () => {
     let gameStarted = false;
     let gameOver = false;
     let gameOverText;
+    let gameTime = 30; // 30 seconds game duration
+    let patientSpawnTimer = 0;
+    let spawnInterval = 2000; // Spawn a new patient every 2 seconds
 
     function preload() {
       // Load doctor character texture
@@ -116,9 +119,9 @@ const Game = () => {
       uiPanel.setStrokeStyle(2, 0x2c3e50);
       uiPanel.setDepth(1);
 
-      // Add timer with better positioning
-      this.gameTimer = 0;
-      this.timerText = this.add.text(600, 16, 'Time: 0s', {
+      // Initialize timer for 60 seconds countdown
+      this.gameTimer = gameTime * 1000; // Convert to milliseconds
+      this.timerText = this.add.text(600, 16, 'Time: 0:30', {
           fontSize: '24px',
           fontFamily: 'Arial',
           color: '#2c3e50',
@@ -142,43 +145,10 @@ const Game = () => {
       this.timerText.setOrigin(0.5, 0);
       scoreText.setOrigin(0.5, 0);
 
-      // Create patients with dynamic health states
+      // Start with fewer initial patients
       patients = [];
-      for (let i = 0; i < 10; i++) {
-        const x = Phaser.Math.Between(50, 750);
-        const y = Phaser.Math.Between(100, 550);
-        const health = Phaser.Math.Between(10, 50);
-        const patient = this.physics.add.sprite(x, y, 'patient-critical');
-        patient.setScale(1.1);
-        patient.health = health;
-        patient.initialHealth = health;
-        patient.saved = false;
-        patient.dead = false;
-
-        // Create health bar for each patient
-        const healthBarWidth = 40;
-        const healthBarHeight = 6;
-        patient.healthBar = this.add.graphics();
-        patient.healthBarBg = this.add.rectangle(
-          x,
-          y - 25,
-          healthBarWidth,
-          healthBarHeight,
-          0x000000,
-          0.2
-        );
-        
-        // Add health text
-        patient.healthText = this.add.text(x, y - 35, '100%', {
-            fontSize: '16px',
-            fontFamily: 'Arial',
-            color: '#000000',
-            align: 'center'
-        });
-        patient.healthText.setOrigin(0.5);
-        
-        updateHealthBar(patient);
-        patients.push(patient);
+      for (let i = 0; i < 5; i++) {
+          spawnPatient.call(this);
       }
 
       // Set up player-patient collision detection
@@ -284,14 +254,33 @@ const Game = () => {
     function update() {
       if (!gameStarted || gameOver) return;
 
-      // Update timer with better formatting
-      const seconds = Math.floor(this.gameTimer / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
+      // Update countdown timer
+      this.gameTimer -= this.game.loop.delta;
+      if (this.gameTimer <= 0) {
+          this.gameTimer = 0;
+          endGame(this);
+          return;
+      }
+
+      // Format and display timer
+      const remainingSeconds = Math.ceil(this.gameTimer / 1000);
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
       this.timerText.setText(
-          `Time: ${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+          `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`
       );
-      this.gameTimer += this.game.loop.delta;
+
+      // Change timer color when time is running out
+      if (remainingSeconds <= 10) {
+          this.timerText.setColor('#ff0000');
+      }
+
+      // Spawn new patients periodically
+      patientSpawnTimer += this.game.loop.delta;
+      if (patientSpawnTimer >= spawnInterval) {
+          spawnPatient.call(this);
+          patientSpawnTimer = 0;
+      }
 
       // Movement logic
       const speed = 300;
@@ -384,6 +373,8 @@ const Game = () => {
       scene.bgMusic.stop();
       scene.gameOverSound.play();
 
+      const timeUp = scene.gameTimer <= 0;
+      
       // Create a semi-transparent overlay
       const overlay = scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.5);
 
@@ -454,6 +445,7 @@ const Game = () => {
 
       // Stats positioned with much more space from title
       const stats = scene.add.text(400, 200, 
+          `${timeUp ? '⏰ Time Up!\n\n' : ''}` +
           `⏱️ Time: ${timeString}\n` +
           `💉 Saved: ${savedPatients}\n` +
           `💔 Lost: ${lostPatients}\n` +
@@ -529,6 +521,10 @@ const Game = () => {
       gameOver = false;
       savedPatients = 0;
       lostPatients = 0;
+      patientSpawnTimer = 0;
+      
+      // Reset timer
+      scene.gameTimer = gameTime * 1000;
       
       // Clean up patients
       patients.forEach(patient => {
@@ -546,6 +542,44 @@ const Game = () => {
       
       scoreText.setText('Saved: 0 | Lost: 0');
       scene.scene.restart();
+    }
+
+    function spawnPatient() {
+        const x = Phaser.Math.Between(50, 750);
+        const y = Phaser.Math.Between(100, 550);
+        const health = Phaser.Math.Between(30, 70);
+        const patient = this.physics.add.sprite(x, y, 'patient-critical');
+        patient.setScale(1.1);
+        patient.health = health;
+        patient.initialHealth = health;
+        patient.saved = false;
+        patient.dead = false;
+
+        // Create health bar for each patient
+        const healthBarWidth = 40;
+        const healthBarHeight = 6;
+        patient.healthBar = this.add.graphics();
+        patient.healthBarBg = this.add.rectangle(
+            x,
+            y - 25,
+            healthBarWidth,
+            healthBarHeight,
+            0x000000,
+            0.2
+        );
+        
+        // Add health text
+        patient.healthText = this.add.text(x, y - 35, '100%', {
+            fontSize: '16px',
+            fontFamily: 'Arial',
+            color: '#000000',
+            align: 'center'
+        });
+        patient.healthText.setOrigin(0.5);
+        
+        updateHealthBar(patient);
+        this.physics.add.overlap(player, patient, healPatient, null, this);
+        patients.push(patient);
     }
 
     const game = new Phaser.Game(config);
