@@ -105,16 +105,30 @@ const Game = () => {
       player.setCollideWorldBounds(true);
 
       // Add UI panel with rounded corners
-      const uiPanel = this.add.rectangle(400, 30, 780, 50, 0xffffff);
+      const uiPanel = this.add.rectangle(400, 30, 780, 50, 0xffffff, 0.95);
       uiPanel.setStrokeStyle(2, 0x2c3e50);
+      uiPanel.setDepth(1);
 
-      // Update score text with better styling
-      scoreText = this.add.text(16, 16, 'Saved: 0 | Lost: 0', {
-        fontSize: '28px',
-        fontFamily: 'Arial',
-        color: '#2c3e50',
-        fontStyle: 'bold'
+      // Add timer
+      this.gameTimer = 0;
+      this.timerText = this.add.text(700, 16, 'Time: 0s', {
+          fontSize: '28px',
+          fontFamily: 'Arial',
+          color: '#2c3e50',
+          fontStyle: 'bold'
       });
+      this.timerText.setDepth(2);
+
+      // Update score text position and style
+      scoreText = this.add.text(16, 16, 'Saved: 0 | Lost: 0', {
+          fontSize: '28px',
+          fontFamily: 'Arial',
+          color: '#2c3e50',
+          fontStyle: 'bold',
+          backgroundColor: '#ffffff80',
+          padding: { x: 10, y: 5 }
+      });
+      scoreText.setDepth(2);
 
       // Create patients with dynamic health states
       patients = [];
@@ -167,36 +181,55 @@ const Game = () => {
       const instructionsPanel = this.add.rectangle(400, 300, 600, 400, 0xffffff, 0.9);
       instructionsPanel.setStrokeStyle(4, 0x2c3e50);
       
-      const title = this.add.text(400, 200, 'Hospital Rush!', {
-        fontSize: '48px',
+      const title = this.add.text(400, 180, 'Vaccine Rush!', {
+        fontSize: '42px',
         fontFamily: 'Arial',
         color: '#2c3e50',
         fontStyle: 'bold'
       });
       title.setOrigin(0.5);
 
+      // Calculate available width for text
+      const padding = 40;
+      const maxWidth = 550;  // Panel width minus padding
+
       const welcomeText = this.add.text(400, 300,
-        'Your mission is to save patients before their health depletes!\n\n' +
+        'Your mission is to save patients before their health depletes!\n\n\n\n' +
         '🔴 Red - Critical Condition\n' +
         '🟡 Yellow - Moderate Condition\n' +
         '🟢 Green - Stable Condition\n\n' +
         'Use arrow keys to move\n\n' +
         'Click anywhere to start!', {
-        fontSize: '24px',
+        fontSize: '22px',
         fontFamily: 'Arial',
         color: '#2c3e50',
         align: 'center',
-        lineSpacing: 10
+        lineSpacing: 10,
+        wordWrap: { width: maxWidth, useAdvancedWrap: true }
       });
       welcomeText.setOrigin(0.5);
 
+      // Adjust position if text is too tall
+      const totalHeight = title.height + welcomeText.height + 20;
+      if (totalHeight > 350) {
+        title.setPosition(400, 150);
+        welcomeText.setPosition(400, title.y + title.height + 20);
+      }
+
       // Store UI elements for later access
       this.instructionsUI = [instructionsPanel, title, welcomeText];
+
+      // Add sound effects
+      this.healSound = { play: () => {} };
+      this.patientLostSound = { play: () => {} };
+      this.gameOverSound = { play: () => {} };
+      this.bgMusic = { play: () => {}, stop: () => {} };
 
       // Start game on click
       this.input.on('pointerdown', () => {
         if (!gameStarted) {
           gameStarted = true;
+          this.bgMusic.play();
           this.instructionsUI.forEach(element => element.destroy());
         } else if (gameOver) {
           restartGame(this);
@@ -206,6 +239,10 @@ const Game = () => {
 
     function update() {
       if (!gameStarted || gameOver) return;
+
+      // Update timer
+      this.gameTimer += this.game.loop.delta;
+      this.timerText.setText(`Time: ${Math.floor(this.gameTimer / 1000)}s`);
 
       // Movement logic
       const speed = 300;
@@ -262,7 +299,26 @@ const Game = () => {
         patient.saved = true;
         patient.health = 100;
         patient.setTexture('patient-stable');
-        patient.healthText.setText('100%');  // Update health text
+        patient.healthText.setText('100%');
+        
+        // Add healing particle effect
+        const particles = this.add.particles(patient.x, patient.y, 'patient-stable', {
+            speed: 100,
+            scale: { start: 0.4, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 1000,
+            gravityY: -50,
+            quantity: 1,
+            frequency: 50,
+            emitting: true
+        });
+        
+        // Stop emitting and destroy particles after animation
+        this.time.delayedCall(1000, () => {
+            particles.destroy();
+        });
+        
+        this.healSound.play();
         savedPatients++;
         updateScore();
       }
@@ -274,20 +330,42 @@ const Game = () => {
 
     function endGame(scene) {
       gameOver = true;
+      scene.bgMusic.stop();
+      scene.gameOverSound.play();
 
-      // Add styled game over panel
-      const panel = scene.add.rectangle(400, 300, 500, 400, 0xffffff, 0.9);
+      // Fancy game over panel with gradient
+      const panel = scene.add.rectangle(400, 300, 500, 400, 0xffffff, 0.95);
       panel.setStrokeStyle(4, 0x2c3e50);
+
+      // Add final stats
+      const timeElapsed = Math.floor(scene.gameTimer / 1000);
+      const saveRate = Math.round((savedPatients / patients.length) * 100);
       
-      gameOverText = scene.add.text(400, 250, 
-        `Game Over!\n\nSaved: ${savedPatients}\nLost: ${lostPatients}`, {
-        fontSize: '36px',
+      gameOverText = scene.add.text(400, 200, 
+        `Game Over!\n\n` +
+        `Time: ${timeElapsed}s\n` +
+        `Saved: ${savedPatients}\n` +
+        `Lost: ${lostPatients}\n` +
+        `Save Rate: ${saveRate}%\n\n` +
+        `Click to play again!`, {
+        fontSize: '32px',
         fontFamily: 'Arial',
         color: '#2c3e50',
         fontStyle: 'bold',
-        align: 'center'
+        align: 'center',
+        lineSpacing: 10
       });
       gameOverText.setOrigin(0.5);
+
+      // Add star rating based on performance
+      const stars = Math.min(5, Math.ceil(saveRate / 20));
+      for (let i = 0; i < 5; i++) {
+          const star = scene.add.text(300 + (i * 40), 400, '⭐', {
+              fontSize: '40px',
+              color: i < stars ? '#FFD700' : '#808080'
+          });
+          star.setOrigin(0.5);
+      }
     }
 
 
