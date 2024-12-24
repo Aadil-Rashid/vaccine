@@ -346,15 +346,15 @@ const Game = () => {
       // Create a semi-transparent overlay
       const overlay = scene.add.rectangle(400, 300, 800, 600, 0x000000, 0.5);
 
-      // Larger panel for better spacing
-      const panel = scene.add.rectangle(400, 300, 550, 550, 0xffffff, 0.95);
+      // Even larger panel with more height
+      const panel = scene.add.rectangle(400, 300, 550, 600, 0xffffff, 0.95);
       panel.setStrokeStyle(4, 0x2c3e50);
 
-      // Move header up
-      const headerBg = scene.add.rectangle(400, 140, 550, 70, 0x2c3e50);
+      // Move header to top
+      const headerBg = scene.add.rectangle(400, 100, 550, 70, 0x2c3e50);
       
-      // Game Over text moved up
-      const gameOverTitle = scene.add.text(400, 140, 'Game Over!', {
+      // Game Over text at top
+      const gameOverTitle = scene.add.text(400, 100, 'Game Over!', {
           fontSize: '44px',
           fontFamily: 'Arial',
           color: '#ffffff',
@@ -402,93 +402,40 @@ const Game = () => {
           starCount = 0;
       }
 
-      // Stats moved down for better spacing
+      // Stats moved further down with more spacing
       const statsStyle = {
           fontSize: '26px',
           fontFamily: 'Arial',
           color: '#2c3e50',
           align: 'left',
-          lineSpacing: 20  // Increased line spacing
+          lineSpacing: 35  // Significantly increased line spacing
       };
 
-      // Stats positioned lower with more space
-      const stats = scene.add.text(400, 260, 
+      // Stats positioned with much more space from title
+      const stats = scene.add.text(400, 200, 
           `⏱️ Time: ${timeString}\n` +
           `💉 Saved: ${savedPatients}\n` +
           `💔 Lost: ${lostPatients}\n` +
           `📊 Save Rate: ${saveRate}%`, 
           statsStyle
       );
-      stats.setOrigin(0.5);
+      stats.setOrigin(0.2);
 
-      // Performance text with more space
-      const performance = scene.add.text(400, 370, performanceText, {
+      // Performance text moved down with more space
+      const performance = scene.add.text(400, 400, performanceText, {
           fontSize: '32px',
           fontFamily: 'Arial',
           color: performanceColor,
           fontStyle: 'bold'
       });
       performance.setOrigin(0.5);
-      
-      // Performance animation
-      scene.tweens.add({
-          targets: performance,
-          scale: { from: 0, to: 1 },
-          duration: 500,
-          ease: 'Back.out'
-      });
 
-      // Stars moved down
-      const starContainer = scene.add.container(0, 430);
-      const starSpacing = 50;
-      const startX = 400 - ((5 * starSpacing) / 2) + (starSpacing / 2);
+      // Stars moved down with more space
+      const starContainer = scene.add.container(0, 470);
 
-      // Star creation logic
-      for (let i = 0; i < 5; i++) {
-          const starX = startX + (i * starSpacing);
-          const isEarned = i < starCount;
-          
-          const starBg = scene.add.text(starX, 0, '⭐', {
-              fontSize: '40px',
-              color: '#D3D3D3'
-          });
-          starBg.setOrigin(0.5);
-          starContainer.add(starBg);
-
-          if (isEarned) {
-              const star = scene.add.text(starX, 0, '⭐', {
-                  fontSize: '40px',
-                  color: '#FFD700'
-              });
-              star.setOrigin(0.5);
-              starContainer.add(star);
-              
-              // Star animations
-              scene.tweens.add({
-                  targets: star,
-                  scale: { from: 0, to: 1 },
-                  duration: 300,
-                  delay: i * 150,
-                  ease: 'Back.out',
-                  onComplete: () => {
-                      scene.tweens.add({
-                          targets: star,
-                          y: { from: 0, to: -5 },
-                          duration: 1000,
-                          yoyo: true,
-                          repeat: -1,
-                          ease: 'Sine.inOut'
-                      });
-                  }
-              });
-          }
-      }
-
-      // Play again button moved to bottom
-      const playAgainBtn = scene.add.rectangle(400, 500, 220, 60, 0x2c3e50, 1);
-      playAgainBtn.setStrokeStyle(2, 0x1abc9c);
-      
-      const playAgainText = scene.add.text(400, 500, 'Play Again', {
+      // Play again button at bottom
+      const playAgainBtn = scene.add.rectangle(400, 540, 220, 60, 0x2c3e50, 1);
+      const playAgainText = scene.add.text(400, 540, 'Play Again', {
           fontSize: '26px',
           fontFamily: 'Arial',
           color: '#ffffff',
