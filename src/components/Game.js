@@ -189,7 +189,7 @@ const Game = () => {
         lineSpacing: 10,
         wordWrap: { width: maxWidth, useAdvancedWrap: true }
       });
-      welcomeText.setOrigin(0.5);
+      welcomeText.setOrigin(0.5, 0.35);
 
       // Adjust position if text is too tall
       const totalHeight = title.height + welcomeText.height + 20;
