@@ -445,14 +445,14 @@ const Game = () => {
 
       // Stats positioned with much more space from title
       const stats = scene.add.text(600, 300, 
-          `${timeUp ? '⏰ Time Up!\n\n' : ''}` +
+          `${timeUp ? '⏰ Time Up!' : ''}` +
           `⏱️ Time: ${timeString}\n` +
           `💉 Saved: ${savedPatients}\n` +
           `💔 Lost: ${lostPatients}\n` +
           `📊 Save Rate: ${saveRate}%`, 
           statsStyle
       );
-      stats.setOrigin(0.2);
+      stats.setOrigin(0.4, 0.2);
 
       // Performance text moved down with more space
       const performance = scene.add.text(600, 500, performanceText, {
@@ -461,7 +461,7 @@ const Game = () => {
           color: performanceColor,
           fontStyle: 'bold'
       });
-      performance.setOrigin(0.5);
+      performance.setOrigin(0.5, 0.002);
 
       // Stars moved down with more space
       const starContainer = scene.add.container(0, 670);
